@@ -1,5 +1,5 @@
-// Spaced Repetition is an efficient learning system that attempts to quiz the 
-// user with flash cards at specific intervals for maximum memory retention. 
+// Spaced Repetition is an efficient learning system that attempts to quiz the
+// user with flash cards at specific intervals for maximum memory retention.
 // The quiz interval is determined by the (0-5) rating the user gives after seeing
 // each card, and increases or decreases depending on difficulty.
 
@@ -14,6 +14,18 @@
 var fs = require('fs');
 var readline = require('readline');
 
+// Set Colors
+var colors = require('colors');
+colors.setTheme({
+  silly: 'rainbow',
+  debug: 'grey',
+  prompt: 'blue',
+  info: 'cyan',
+  success: 'green',
+  warning: 'yellow',
+  danger: 'red'
+});
+
 var cardFile = 'baseCards.json',
     quizList = [],
     quizTimer = 4000,
@@ -24,14 +36,14 @@ var cardFile = 'baseCards.json',
 
 today.setHours(0,0,0,0);
 
-console.log("Welcome to Command Line Spaced Repetition!\n" +
-  "After each word please grade yourself as follows:\n" +
-  "(0) What the heck was that? (No recognition)\n" +
-  "(1) Wrong answer, but recognized the word.\n" +
-  "(2) Wrong answer, but it was on the tip of my tongue!\n" +
-  "(3) Got it right, but just barely.\n" +
-  "(4) Got it right, had to think about it.\n" +
-  "(5) Knew the answer immediately.");
+console.log("Welcome to Command Line Spaced Repetition!\n".success +
+  "After each word please grade yourself as follows:\n".info +
+  "(0)".info + " What the heck was that? (No recognition)\n" +
+  "(1)".info + " Wrong answer, but recognized the word.\n" +
+  "(2)".info + " Wrong answer, but it was on the tip of my tongue!\n" +
+  "(3)".info + " Got it right, but just barely.\n" +
+  "(4)".info + " Got it right, had to think about it.\n" +
+  "(5)".info + " Knew the answer immediately.");
 
 function readCardFile(file) {
   var data = fs.readFileSync(file);
@@ -52,10 +64,10 @@ function cardQuizCount() {
 
 function preQuiz(count) {
   if (count > 0) {
-    console.log("You have " + count + " cards to go through.");
-    getUserInput("Press enter to begin or 'exit' to quit: ", startStopQuiz);
+    console.log("You have ".success + String(count).bold.success + " cards to go through.".success);
+    getUserInput("Press enter to begin or 'exit' to quit: ".prompt, startStopQuiz);
   } else {
-    console.log("No cards due. Come back tomorrow :)");
+    console.log("No cards due.".success + " Come back tomorrow :)".info);
   }
 }
 
@@ -106,10 +118,10 @@ function getNextCard(card) {
 }
 
 function quizCard(card) {
-  console.log("Side 1: " + card.side1);
+  console.log("Side 1: ".info + card.side1);
   setTimeout(function() {
-    console.log("Side 2: " + card.side2);
-    getUserInput("Grade> ", parseCardGrade, card);
+    console.log("Side 2: ".info + card.side2);
+    getUserInput("Grade> ".prompt, parseCardGrade, card);
   }, quizTimer);
 }
 
@@ -172,7 +184,7 @@ function calcIntervalEF(card, grade) {
 
 function writeCardFile(cardFile) {
   fs.writeFileSync(cardFile, JSON.stringify(cards, null, 2));
-  console.log("\nProgress saved back to file.");
+  console.log("\nProgress saved back to file.".info);
 }
 
 cards = readCardFile(cardFile);

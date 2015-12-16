@@ -1,0 +1,30 @@
+{
+  "name": "spaced-repetition",
+  "version": "1.0.0",
+  "description": "Console based Spaced Repetition software built with NodeJS",
+  "main": "refactor.js",
+  "scripts": {
+    "start": "node refactor.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rakeshtembhurne/spaced-repetition.git"
+  },
+  "keywords": [
+    "spaced-repetition",
+    "memory",
+    "brain",
+    "learning",
+    "learn",
+    "teach",
+    "tutorial"
+  ],
+  "author": "Rakesh Tembhurne",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rakeshtembhurne/spaced-repetition/issues"
+  },
+  "dependencies": {
+    "colors": "^1.1.2"
+  }
+}
