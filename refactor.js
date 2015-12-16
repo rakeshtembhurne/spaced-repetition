@@ -13,6 +13,8 @@
 
 var fs = require('fs');
 var readline = require('readline');
+var _ = require("lodash");
+var models = require("./models");
 
 // Set Colors
 var colors = require('colors');
@@ -45,9 +47,21 @@ console.log("Welcome to Command Line Spaced Repetition!\n".success +
   "(4)".info + " Got it right, had to think about it.\n" +
   "(5)".info + " Knew the answer immediately.");
 
-function readCardFile(file) {
-  var data = fs.readFileSync(file);
-  return JSON.parse(data);
+function readCardFile(file, callback) {
+  // Get recors from file from file
+  // var data = fs.readFileSync(file); data = JSON.parse(data); return data;
+
+  // Creates initial database
+  // _.each(data, function(d) {models.Card.create(d); });
+
+  models.Card.findAll().then(function(cards) {
+    // Removes all records from database
+    // _.each(cards, function(card) { card.destroy(); })
+
+    // Set all data
+    data = JSON.parse(JSON.stringify(cards));
+    callback(data);
+  });
 }
 
 function cardQuizCount() {
@@ -106,7 +120,7 @@ function getNextCard(card) {
   if (!card.prevDate) { card.prevDate = today; }
   if (!card.interval) { card.interval = 0; }
   if (!card.reps) {  card.reps = 0; }
-  if (!card.EF) { card.EF = 2.5; }
+  if (!card.ef) { card.ef = 2.5; }
 
   var nextDate = new Date(card.nextDate); //convert to comparable date type
   if (nextDate <= today) {
@@ -143,7 +157,7 @@ function parseCardGrade(line, card) {
 //        (3)   Set interval to 0, lower the EF, reps + 1 (repeat card today)
 //        (4-5) Reps + 1, interval is calculated using EF, increasing in time.
 function calcIntervalEF(card, grade) {
-  var oldEF = card.EF,
+  var oldEF = card.ef,
       newEF = 0,
       nextDate = new Date(today);
 
@@ -154,9 +168,9 @@ function calcIntervalEF(card, grade) {
 
     newEF = oldEF + (0.1 - (5-grade)*(0.08+(5-grade)*0.02));
     if (newEF < 1.3) { // 1.3 is the minimum EF
-      card.EF = 1.3;
+      card.ef = 1.3;
     } else {
-      card.EF = newEF;
+      card.ef = newEF;
     }
 
     card.reps = card.reps + 1;
@@ -169,7 +183,7 @@ function calcIntervalEF(card, grade) {
         card.interval = 6;
         break;
       default:
-        card.interval = Math.round((card.reps - 1) * card.EF);
+        card.interval = Math.round((card.reps - 1) * card.ef);
         break;
     }
   }
@@ -183,10 +197,23 @@ function calcIntervalEF(card, grade) {
 }
 
 function writeCardFile(cardFile) {
-  fs.writeFileSync(cardFile, JSON.stringify(cards, null, 2));
+
+  _.each(cards, function(card) {
+    models.Card.update(card, {where: {id: card.id }})
+    .then(function() {
+      // console.log("updated ", card);
+    });
+  });
+
+  // fs.writeFileSync(cardFile, JSON.stringify(cards, null, 2));
   console.log("\nProgress saved back to file.".info);
 }
 
-cards = readCardFile(cardFile);
-count = cardQuizCount();
-preQuiz(count);
+models.sequelize.sync().then(function() {
+  readCardFile(cardFile, function(data) {
+    // console.log(data);
+    cards = data;
+    count = cardQuizCount();
+    preQuiz(count);
+  });
+});
